@@ -17,6 +17,7 @@ import requests
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from plexapi.server import PlexServer
 from dotenv import load_dotenv
+
 load_dotenv(verbose=True)
 
 # === User Configurable Options ===
@@ -25,8 +26,8 @@ load_dotenv(verbose=True)
 
 # OPTION 1: Hardcode baseurl and token (not recommended in production)
 # UNCOMMENT the following lines if you want to hardcode values:
-#baseurl = ''  # Your Plex server base URL, example: baseurl='http://192.168.1.100:32400'
-#token = ''    # Your Plex API token, example: token='f6a5e7a6d9f6a8d6f7a5e8d5'
+# baseurl = ''  # Your Plex server base URL, example: baseurl='http://192.168.1.100:32400'
+# token = ''    # Your Plex API token, example: token='f6a5e7a6d9f6a8d6f7a5e8d5'
 
 # OPTION 2: Use environment variables (recommended)
 # Open your .env file in your text editor and set the environment variables:
@@ -34,16 +35,20 @@ load_dotenv(verbose=True)
 # Example: TOKEN='f6a5e7a6d9f6a8d6f7a5e8d5'
 
 # Script options
-order_by = 'mix'            # 'aired', 'added', or 'mix' (mix will round up limit to a multiple of 3)
-download_movies = True      # Allow background generation for Plex movies
-download_series = True      # Allow background generation for Plex TV series
-limit = 10                  # Max backgrounds per content type (TV/movies), so total can be up to limit × enabled types
-debug = False               # Enable debug message printing
+order_by = (
+    "mix"  # 'aired', 'added', or 'mix' (mix will round up limit to a multiple of 3)
+)
+download_movies = True  # Allow background generation for Plex movies
+download_series = True  # Allow background generation for Plex TV series
+limit = 10  # Max backgrounds per content type (TV/movies), so total can be up to limit × enabled types
+debug = False  # Enable debug message printing
 
 # Plex logo settings
 logo_variant = "white"  # "white" or "color"
 plex_logo_horizontal_offset = 0  # Adjust right (+) or left (-) by this many pixels (default: 0 for Roboto-Light.ttf)
-plex_logo_vertical_offset = 7    # Adjust down (+) or up (-) by this many pixels (default: 7 for Roboto-Light.ttf)
+plex_logo_vertical_offset = (
+    7  # Adjust down (+) or up (-) by this many pixels (default: 7 for Roboto-Light.ttf)
+)
 
 # Max length of a TV or movie summary in characters (set to None to use the default of 525)
 max_summary_chars = None
@@ -52,16 +57,18 @@ max_summary_chars = None
 max_summary_width = None  # Set to an integer like 2100, or leave as None for default
 
 # Custom text labels for group types, shown before the Plex logo image; replace to personalize
-added_label = "New or updated on"             # Label for recently added items (default: "New or updated on")
+added_label = (
+    "New or updated on"  # Label for recently added items (default: "New or updated on")
+)
 aired_label = "Recent release, available on"  # Label for recently aired items (default: "Recent release, available on")
-random_label = "Random pick from"             # Label for random picks in mix mode (default: "Random pick from")
-default_label = "New or updated on"           # Fallback label for unexpected cases (default: "New or updated on")
+random_label = "Random pick from"  # Label for random picks in mix mode (default: "Random pick from")
+default_label = "New or updated on"  # Fallback label for unexpected cases (default: "New or updated on")
 
 # User-configurable font URL and name; if unavailble, script tries fallback fonts
 # May need to adjust the vertical adjustment for the Plex logo if it doesn't line
 # up, see logo_vertical_adjustment above.
-user_font_url = 'https://github.com/googlefonts/roboto/raw/main/src/hinted/Roboto-Light.ttf'  # URL to download TTF
-user_font_name = 'Roboto-Light.ttf'  # Filename to save the font as
+user_font_url = "https://github.com/googlefonts/roboto/raw/main/src/hinted/Roboto-Light.ttf"  # URL to download TTF
+user_font_name = "Roboto-Light.ttf"  # Filename to save the font as
 
 # Text colors (can be color names like "white", "black", or RGB tuples like (255, 255, 255))
 # Examples of valid color inputs:
@@ -70,17 +77,19 @@ user_font_name = 'Roboto-Light.ttf'  # Filename to save the font as
 #   - (255, 0, 0)  # red in RGB tuple form
 #   - (150, 150, 150)  # gray in RGB tuple form
 # Note: RGB tuples must be 3 integers in range 0-255.
-main_color      = "white"             # Main title or header text color
-info_color      = (150, 150, 150)     # Subdued secondary info text color (gray tone)
-summary_color   = "white"             # Summary text color
-metadata_color  = "white"             # Metadata text color (e.g., year, genre)
+main_color = "white"  # Main title or header text color
+info_color = (150, 150, 150)  # Subdued secondary info text color (gray tone)
+summary_color = "white"  # Summary text color
+metadata_color = "white"  # Metadata text color (e.g., year, genre)
 
 # Shadow styling
-shadow_color    = "black"             # Shadow color behind text
-shadow_offset   = 2                   # Shadow offset in pixels (x and y direction)
+shadow_color = "black"  # Shadow color behind text
+shadow_offset = 2  # Shadow offset in pixels (x and y direction)
 
 # Seconds to sleep between processing each media item to reduce Plex server load
-plex_api_delay_seconds = 1.0  # Default 1 second; adjust as needed if Plex is struggling to keep up
+plex_api_delay_seconds = (
+    1.0  # Default 1 second; adjust as needed if Plex is struggling to keep up
+)
 
 # === Script Initialization ===
 # NOTE: This section and those below are for internal script use only.
@@ -93,11 +102,15 @@ if os.path.exists(background_dir):
 os.makedirs(background_dir, exist_ok=True)
 
 # If baseurl or token are not hardcoded, then load from environment variables
-baseurl = locals().get('baseurl', os.getenv('PLEX_BASEURL'))  # Plex server base URL either hardcoded or from environment
-token = locals().get('token', os.getenv('PLEX_TOKEN'))  # Plex API token either hardcoded from environment
+baseurl = locals().get(
+    "baseurl", os.getenv("PLEX_BASEURL")
+)  # Plex server base URL either hardcoded or from environment
+token = locals().get(
+    "token", os.getenv("PLEX_TOKEN")
+)  # Plex API token either hardcoded from environment
 
 # Validate that either hardcoded values or environment variables are set
-if not baseurl or baseurl.strip() == '' or not token or token.strip() == '':
+if not baseurl or baseurl.strip() == "" or not token or token.strip() == "":
     print("ERROR: Both Plex server base URL and API token are required.")
     print("Please set one of the following options:")
     print("1. Uncomment and set your hardcoded baseurl and token in the script.")
@@ -111,14 +124,23 @@ plex_instance = None
 truetype_path = None
 
 # Fallback font settings (Roboto Light)
-fallback_font_url = 'https://github.com/googlefonts/roboto/raw/main/src/hinted/Roboto-Light.ttf'  # Roboto Light as fallback
-fallback_font_path = 'Roboto-Light.ttf'  # Path for Roboto Light
+fallback_font_url = "https://github.com/googlefonts/roboto/raw/main/src/hinted/Roboto-Light.ttf"  # Roboto Light as fallback
+fallback_font_path = "Roboto-Light.ttf"  # Path for Roboto Light
 
 # Additional fallback fonts (e.g., Lato Light, Poppins Light)
 additional_fallback_fonts = [
-    {'url': 'https://github.com/googlefonts/opensans/raw/main/fonts/ttf/OpenSans-Light.ttf', 'path': 'OpenSans-Light.ttf'},
-    {'url': 'https://github.com/googlefonts/lato/raw/main/fonts/ttf/Lato-Light.ttf', 'path': 'Lato-Light.ttf'},
-    {'url': 'https://github.com/googlefonts/poppins/raw/main/fonts/ttf/Poppins-Light.ttf', 'path': 'Poppins-Light.ttf'}
+    {
+        "url": "https://github.com/googlefonts/opensans/raw/main/fonts/ttf/OpenSans-Light.ttf",
+        "path": "OpenSans-Light.ttf",
+    },
+    {
+        "url": "https://github.com/googlefonts/lato/raw/main/fonts/ttf/Lato-Light.ttf",
+        "path": "Lato-Light.ttf",
+    },
+    {
+        "url": "https://github.com/googlefonts/poppins/raw/main/fonts/ttf/Poppins-Light.ttf",
+        "path": "Poppins-Light.ttf",
+    },
 ]
 
 # Map plex logo variant to filename
@@ -131,6 +153,7 @@ plex_logo_file = logo_filenames.get(logo_variant, "plexlogo.png")
 
 # === Utility Functions ===
 
+
 def download_font(url, path):
     """
     Function to download and save the font from the provided URL.
@@ -140,12 +163,14 @@ def download_font(url, path):
         if not os.path.exists(path):
             response = requests.get(url, timeout=10)
             if response.status_code == 200:
-                with open(path, 'wb') as f:
+                with open(path, "wb") as f:
                     f.write(response.content)
                 debug and print(f"[DEBUG] {path} font downloaded and saved.")
                 return True
             else:
-                print(f"[ERROR] Failed to download {path} font. HTTP Status: {response.status_code}")
+                print(
+                    f"[ERROR] Failed to download {path} font. HTTP Status: {response.status_code}"
+                )
                 return False
         else:
             debug and print(f"[DEBUG] {path} font already exists.")
@@ -153,6 +178,7 @@ def download_font(url, path):
     except Exception as e:
         print(f"[ERROR] Error downloading font: {e}")
         return False
+
 
 def initialize_plex_connection():
     """
@@ -169,6 +195,7 @@ def initialize_plex_connection():
     else:
         debug and print("[DEBUG] Plex server is already initialized.")
 
+
 def validate_color(color, default):
     """
     Validate color input.
@@ -184,11 +211,15 @@ def validate_color(color, default):
             return color
     return default
 
+
 def vignette_side(h, w, fade_ratio=5, fade_power=5.0, position="bottom-left"):
     y, x = np.ogrid[0:h, 0:w]
     rx, ry = w * fade_ratio, h * fade_ratio
 
-    dist_x, dist_y = np.ones_like(x, dtype=np.float32), np.ones_like(y, dtype=np.float32)
+    dist_x, dist_y = (
+        np.ones_like(x, dtype=np.float32),
+        np.ones_like(y, dtype=np.float32),
+    )
 
     if "left" in position:
         dist_x = np.clip(x / rx, 0, 1)
@@ -200,15 +231,17 @@ def vignette_side(h, w, fade_ratio=5, fade_power=5.0, position="bottom-left"):
     elif "bottom" in position:
         dist_y = np.clip((h - y) / ry, 0, 1)
 
-    if any(corner in position for corner in ["left", "right"]) and \
-       any(corner in position for corner in ["top", "bottom"]):
+    if any(corner in position for corner in ["left", "right"]) and any(
+        corner in position for corner in ["top", "bottom"]
+    ):
         alpha = np.minimum(dist_x, dist_y)
     else:
         alpha = dist_x * dist_y
 
-    alpha = (alpha ** fade_power * 255).astype(np.uint8)
+    alpha = (alpha**fade_power * 255).astype(np.uint8)
     mask = Image.fromarray(alpha)
     return mask
+
 
 def generate_background_fast(input_img, target_width=3000):
     """
@@ -243,9 +276,9 @@ def generate_background_fast(input_img, target_width=3000):
     return canvas.convert("RGB")
 
 
-
-
-def create_blurry_background(image, size=(3840, 2160), blur_radius=800, dither_strength=16):
+def create_blurry_background(
+    image, size=(3840, 2160), blur_radius=800, dither_strength=16
+):
     """
     Create a blurry canvas background from the input image, with strong noise to prevent banding.
     """
@@ -273,6 +306,7 @@ def validate_shadow_offset(offset, default):
     except (ValueError, TypeError):
         return default
 
+
 def resize_image(image: Image.Image, target_height: int) -> Image.Image:
     """
     Resizes an image to a specific height while maintaining aspect ratio.
@@ -284,6 +318,7 @@ def resize_image(image: Image.Image, target_height: int) -> Image.Image:
     ratio = target_height / image.height
     target_width = int(image.width * ratio)
     return image.resize((target_width, target_height))
+
 
 def resize_logo(image: Image.Image, max_width: int, max_height: int) -> Image.Image:
     """
@@ -304,6 +339,7 @@ def resize_logo(image: Image.Image, max_width: int, max_height: int) -> Image.Im
 
     return image.resize((new_width, new_height))
 
+
 def truncate_summary(summary: str, max_chars: int) -> tuple[str, bool]:
     """
     Truncates a summary only if needed, at word boundaries, if it exceeds the character limit.
@@ -322,7 +358,10 @@ def truncate_summary(summary: str, max_chars: int) -> tuple[str, bool]:
         # If no space to fit anything (e.g. max_chars < len(placeholder))
         return "...", True
 
-def draw_text_with_shadow(draw, position, text, font, fill_color, shadow_color, shadow_offset=(2,2)):
+
+def draw_text_with_shadow(
+    draw, position, text, font, fill_color, shadow_color, shadow_offset=(2, 2)
+):
     """
     Draws text with a shadow effect on an image or canvas.
 
@@ -332,9 +371,12 @@ def draw_text_with_shadow(draw, position, text, font, fill_color, shadow_color, 
     # Unpack the x and y coordinates from the provided position tuple
     x, y = position
     # The shadow is drawn slightly offset from the main text using the shadow_offset parameter (default is (2, 2))
-    draw.text((x + shadow_offset[0], y + shadow_offset[1]), text, font=font, fill=shadow_color)
+    draw.text(
+        (x + shadow_offset[0], y + shadow_offset[1]), text, font=font, fill=shadow_color
+    )
     # The main text is drawn on top of the shadow at the original position (x, y)
     draw.text((x, y), text, font=font, fill=fill_color)
+
 
 def wrap_text_by_pixel_width(text, font, max_width, draw):
     """
@@ -377,6 +419,7 @@ def wrap_text_by_pixel_width(text, font, max_width, draw):
 
     return lines
 
+
 def clean_filename(filename: str) -> str:
     """
     Sanitizes a filename by replacing problematic characters with underscores.
@@ -385,6 +428,7 @@ def clean_filename(filename: str) -> str:
     :return: Cleaned filename safe for filesystem usage.
     """
     return "".join(c if c.isalnum() or c in "._-" else "_" for c in filename)
+
 
 def download_logo_in_memory(media_item) -> Image.Image or None:
     """
@@ -400,15 +444,24 @@ def download_logo_in_memory(media_item) -> Image.Image or None:
         if response.status_code == 200:
             return Image.open(BytesIO(response.content))
         else:
-            debug and print(f"Failed to retrieve logo for {media_item.title}. Status: {response.status_code}")
+            debug and print(
+                f"Failed to retrieve logo for {media_item.title}. Status: {response.status_code}"
+            )
     except Exception as e:
         debug and print(f"Exception downloading logo for {media_item.title}: {e}")
 
     return None
 
-def generate_background_for_item(item, media_type, group_type='',
-                                 base_background=None, overlay=None,
-                                 plex_logo=None, target_folder=None):
+
+def generate_background_for_item(
+    item,
+    media_type,
+    group_type="",
+    base_background=None,
+    overlay=None,
+    plex_logo=None,
+    target_folder=None,
+):
     """
     Generates a customized background image for a given Plex media item (movie or show).
     Downloads the art directly into memory, applies overlays, adds metadata text, and saves the final image.
@@ -445,7 +498,11 @@ def generate_background_for_item(item, media_type, group_type='',
         image = Image.open(BytesIO(response.content))
 
         # Safe filename
-        filename_safe_title = unicodedata.normalize('NFKD', item.title).encode('ASCII', 'ignore').decode('utf-8')
+        filename_safe_title = (
+            unicodedata.normalize("NFKD", item.title)
+            .encode("ASCII", "ignore")
+            .decode("utf-8")
+        )
         filename_safe_title = clean_filename(filename_safe_title)
 
         # Save into target_folder instead of background_dir
@@ -453,7 +510,6 @@ def generate_background_for_item(item, media_type, group_type='',
 
         # Make copies of cached base background and overlay
         canvas = generate_background_fast(image)
-
 
         # Prepare to draw
         draw = ImageDraw.Draw(canvas)
@@ -465,15 +521,21 @@ def generate_background_for_item(item, media_type, group_type='',
             font_summary = ImageFont.truetype(truetype_path, size=50)
             font_custom = ImageFont.truetype(truetype_path, size=60)
         except (OSError, IOError) as e:
-            print(f"[ERROR] Stopped background generation. Failed to load font from '{truetype_path}': {e}")
+            print(
+                f"[ERROR] Stopped background generation. Failed to load font from '{truetype_path}': {e}"
+            )
             return  # Exit the function early; image generation cannot proceed without fonts
 
         # Info text
-        if media_type == 'movie':
+        if media_type == "movie":
             max_genres = 3
             genres_list = [genre.tag for genre in item.genres][:max_genres]
-            genres_text = ', '.join(genres_list)
-            rating = getattr(item, "audienceRating", None) or getattr(item, "rating", None) or ""
+            genres_text = ", ".join(genres_list)
+            rating = (
+                getattr(item, "audienceRating", None)
+                or getattr(item, "rating", None)
+                or ""
+            )
             rating_text = f" IMDb: {rating}" if rating else ""
             duration = getattr(item, "duration", None)
             if duration:
@@ -503,14 +565,24 @@ def generate_background_for_item(item, media_type, group_type='',
         else:
             max_genres = 3
             genres_list = [genre.tag for genre in item.genres][:max_genres]
-            genres_text = ', '.join(genres_list)
-            rating = getattr(item, "audienceRating", None) or getattr(item, "rating", None) or ""
+            genres_text = ", ".join(genres_list)
+            rating = (
+                getattr(item, "audienceRating", None)
+                or getattr(item, "rating", None)
+                or ""
+            )
             rating_text = f"IMDb: {rating}" if rating else ""
             contentrating = getattr(item, "contentRating", None) or ""
             contentrating_text = contentrating if contentrating else ""
             seasons = getattr(item, "seasons", lambda: [])()
             seasons_count = len(seasons)
-            seasons_text = f"{seasons_count} Season" if seasons_count == 1 else f"{seasons_count} Seasons" if seasons_count else ""
+            seasons_text = (
+                f"{seasons_count} Season"
+                if seasons_count == 1
+                else f"{seasons_count} Seasons"
+                if seasons_count
+                else ""
+            )
 
             info_parts = [str(item.year)]
 
@@ -534,15 +606,14 @@ def generate_background_for_item(item, media_type, group_type='',
         summary_max_chars = max_summary_chars if max_summary_chars is not None else 525
 
         # Use default max width if not explicitly set
-        summary_pixel_width = max_summary_width if max_summary_width is not None else 2100
+        summary_pixel_width = (
+            max_summary_width if max_summary_width is not None else 2100
+        )
 
         # Truncate and wrap summary text
         summary_text, was_truncated = truncate_summary(item.summary, summary_max_chars)
         wrapped_summary_lines = wrap_text_by_pixel_width(
-            summary_text,
-            font_summary,
-            max_width=summary_pixel_width,
-            draw=draw
+            summary_text, font_summary, max_width=summary_pixel_width, draw=draw
         )
         # Adds a newline between each summary line, may not be enough for fonts
         # with fancy flourishes but should work most of the time. Can improve this
@@ -550,11 +621,11 @@ def generate_background_for_item(item, media_type, group_type='',
         wrapped_summary = "\n".join(wrapped_summary_lines)
 
         # Custom label text, uses the user-defined custom text options
-        if group_type == 'added':
+        if group_type == "added":
             custom_text = added_label
-        elif group_type == 'aired':
+        elif group_type == "aired":
             custom_text = aired_label
-        elif group_type == 'random':
+        elif group_type == "random":
             custom_text = random_label
         else:
             custom_text = default_label
@@ -568,8 +639,8 @@ def generate_background_for_item(item, media_type, group_type='',
             font_info,
             fill_color=info_color,
             shadow_color=shadow_color,
-            shadow_offset=(shadow_offset, shadow_offset)
-)
+            shadow_offset=(shadow_offset, shadow_offset),
+        )
         # Summary block
         summary_position = (210, 730)
         draw_text_with_shadow(
@@ -579,8 +650,8 @@ def generate_background_for_item(item, media_type, group_type='',
             font_summary,
             fill_color=summary_color,
             shadow_color=shadow_color,
-            shadow_offset=(shadow_offset, shadow_offset)
-)
+            shadow_offset=(shadow_offset, shadow_offset),
+        )
 
         # Custom label and attempt at Plex logo positioning
         draw_bbox = draw.textbbox((0, 0), custom_text, font=font_custom)
@@ -604,7 +675,7 @@ def generate_background_for_item(item, media_type, group_type='',
             font_custom,
             fill_color=metadata_color,
             shadow_color=shadow_color,
-            shadow_offset=(shadow_offset, shadow_offset)
+            shadow_offset=(shadow_offset, shadow_offset),
         )
 
         # Paste Plex Logo
@@ -613,7 +684,7 @@ def generate_background_for_item(item, media_type, group_type='',
         # Logo or fallback title
         logo_image = download_logo_in_memory(item)
         if logo_image:
-            logo_resized = resize_logo(logo_image, 1300, 400).convert('RGBA')
+            logo_resized = resize_logo(logo_image, 1300, 400).convert("RGBA")
             logo_position = (210, info_position[1] - logo_resized.height - 25)
             canvas.paste(logo_resized, logo_position, logo_resized)
         else:
@@ -626,11 +697,11 @@ def generate_background_for_item(item, media_type, group_type='',
                 font_title,
                 fill_color=main_color,
                 shadow_color=shadow_color,
-                shadow_offset=(shadow_offset, shadow_offset)
+                shadow_offset=(shadow_offset, shadow_offset),
             )
 
         # Save final image
-        canvas = canvas.convert('RGB')
+        canvas = canvas.convert("RGB")
         canvas.save(background_filename)
         print(f"Image saved: {background_filename}")
 
@@ -641,11 +712,16 @@ def generate_background_for_item(item, media_type, group_type='',
     except Exception as e:
         print(f"An error occurred while processing {item.title}: {e}")
 
-def download_latest_media(order_by, limit, media_type,
-                          target_folder=None,
-                          base_background=None,
-                          overlay=None,
-                          plex_logo=None):
+
+def download_latest_media(
+    order_by,
+    limit,
+    media_type,
+    target_folder=None,
+    base_background=None,
+    overlay=None,
+    plex_logo=None,
+):
     """
     Downloads and processes the latest media items from Plex library.
 
@@ -664,10 +740,10 @@ def download_latest_media(order_by, limit, media_type,
     initialize_plex_connection()
 
     # Early exit if media type not enabled by global flags
-    if media_type == 'movie' and not download_movies:
+    if media_type == "movie" and not download_movies:
         debug and print("[DEBUG] Movie downloads disabled; skipping.")
         return
-    if media_type == 'tv' and not download_series:
+    if media_type == "tv" and not download_series:
         debug and print("[DEBUG] Series downloads disabled; skipping.")
         return
 
@@ -685,28 +761,34 @@ def download_latest_media(order_by, limit, media_type,
         shows_with_dates = []
         for show in shows:
             episodes = show.episodes()
-            episodes_with_date = [ep for ep in episodes if getattr(ep, key_attr) is not None]
+            episodes_with_date = [
+                ep for ep in episodes if getattr(ep, key_attr) is not None
+            ]
             if episodes_with_date:
-                latest_episode = max(episodes_with_date, key=lambda ep: getattr(ep, key_attr))
+                latest_episode = max(
+                    episodes_with_date, key=lambda ep: getattr(ep, key_attr)
+                )
                 shows_with_dates.append((show, getattr(latest_episode, key_attr)))
-        return [s[0] for s in sorted(shows_with_dates, key=lambda x: x[1], reverse=True)]
+        return [
+            s[0] for s in sorted(shows_with_dates, key=lambda x: x[1], reverse=True)
+        ]
 
-    if media_type == 'movie':
-        media_items = plex_instance.library.search(libtype='movie')
-        if order_by == 'aired':
-            media_sorted = sort_movies(media_items, 'originallyAvailableAt')
-        elif order_by == 'added':
-            media_sorted = sort_movies(media_items, 'addedAt')
+    if media_type == "movie":
+        media_items = plex_instance.library.search(libtype="movie")
+        if order_by == "aired":
+            media_sorted = sort_movies(media_items, "originallyAvailableAt")
+        elif order_by == "added":
+            media_sorted = sort_movies(media_items, "addedAt")
         else:
             print("Invalid order_by parameter. Please use 'aired' or 'added'.")
             return
 
-    elif media_type == 'tv':
-        media_items = plex_instance.library.search(libtype='show')
-        if order_by == 'aired':
-            media_sorted = sort_shows(media_items, 'originallyAvailableAt')
-        elif order_by == 'added':
-            media_sorted = sort_shows(media_items, 'addedAt')
+    elif media_type == "tv":
+        media_items = plex_instance.library.search(libtype="show")
+        if order_by == "aired":
+            media_sorted = sort_shows(media_items, "originallyAvailableAt")
+        elif order_by == "added":
+            media_sorted = sort_shows(media_items, "addedAt")
         else:
             print("Invalid order_by parameter. Please use 'aired' or 'added'.")
             return
@@ -714,7 +796,9 @@ def download_latest_media(order_by, limit, media_type,
         print("Invalid media_type parameter. Use 'movie' or 'tv'.")
         return
 
-    debug and print(f"[DEBUG] Processing {len(media_sorted[:limit])} {media_type} items sorted by {order_by}")
+    debug and print(
+        f"[DEBUG] Processing {len(media_sorted[:limit])} {media_type} items sorted by {order_by}"
+    )
 
     for item in media_sorted[:limit]:
         generate_background_for_item(
@@ -724,9 +808,10 @@ def download_latest_media(order_by, limit, media_type,
             base_background=None,
             overlay=None,
             plex_logo=plex_logo,
-            target_folder=target_folder
+            target_folder=target_folder,
         )
         time.sleep(plex_api_delay_seconds)
+
 
 def fetch_items(media_type, sort_type, count):
     """
@@ -745,10 +830,10 @@ def fetch_items(media_type, sort_type, count):
     initialize_plex_connection()
 
     # Get sections relevant for the media type
-    if media_type == 'movie':
-        sections = [s for s in plex_instance.library.sections() if s.type == 'movie']
-    elif media_type == 'show':
-        sections = [s for s in plex_instance.library.sections() if s.type == 'show']
+    if media_type == "movie":
+        sections = [plex_instance.library.section("Movies")]
+    elif media_type == "show":
+        sections = [plex_instance.library.section("TV Shows")]
     else:
         print(f"[ERROR] Invalid media_type: {media_type}. Expected 'movie' or 'show'.")
         return []
@@ -759,19 +844,24 @@ def fetch_items(media_type, sort_type, count):
         items.extend(section.search())
 
     # Sort/filter items based on sort_type
-    if sort_type == 'aired':
-        filtered = [i for i in items if getattr(i, 'originallyAvailableAt', None) is not None]
-        sorted_items = sorted(filtered, key=lambda x: x.originallyAvailableAt, reverse=True)
-    elif sort_type == 'added':
-        filtered = [i for i in items if getattr(i, 'addedAt', None) is not None]
+    if sort_type == "aired":
+        filtered = [
+            i for i in items if getattr(i, "originallyAvailableAt", None) is not None
+        ]
+        sorted_items = sorted(
+            filtered, key=lambda x: x.originallyAvailableAt, reverse=True
+        )
+    elif sort_type == "added":
+        filtered = [i for i in items if getattr(i, "addedAt", None) is not None]
         sorted_items = sorted(filtered, key=lambda x: x.addedAt, reverse=True)
-    elif sort_type == 'random':
+    elif sort_type == "random":
         # Random sample (no sort needed)
         return random.sample(items, min(count, len(items)))
     else:
         return []
 
     return sorted_items[:count]
+
 
 def dedup(items, seen):
     """
@@ -794,6 +884,7 @@ def dedup(items, seen):
             seen.add(item.ratingKey)
             unique_items.append(item)
     return unique_items
+
 
 def get_mixed_media(limit, download_movies=True, download_series=True, seen=None):
     """
@@ -821,21 +912,23 @@ def get_mixed_media(limit, download_movies=True, download_series=True, seen=None
     original_limit = limit
     adjusted_limit = int(math.ceil(limit / 3.0) * 3)
     if adjusted_limit != original_limit:
-        debug and print(f"[DEBUG] Limit adjusted from {original_limit} to {adjusted_limit} for equal group distribution.")
+        debug and print(
+            f"[DEBUG] Limit adjusted from {original_limit} to {adjusted_limit} for equal group distribution."
+        )
     per_group = adjusted_limit // 3
 
-    final_items_by_group = {'aired': [], 'added': [], 'random': []}
+    final_items_by_group = {"aired": [], "added": [], "random": []}
 
     # Determine media_type for current call
     if download_movies and not download_series:
-        media_type = 'movie'
+        media_type = "movie"
     elif download_series and not download_movies:
-        media_type = 'show'
+        media_type = "show"
     else:
-        media_type = 'movie'  # Fallback: assume movies only if ambiguous
+        media_type = "movie"  # Fallback: assume movies only if ambiguous
 
     # Loop through each group type
-    for group_type in ['aired', 'added', 'random']:
+    for group_type in ["aired", "added", "random"]:
         collected = []
         attempts = 0
         max_attempts = 3
@@ -850,31 +943,45 @@ def get_mixed_media(limit, download_movies=True, download_series=True, seen=None
             attempts += 1
             overfetch_factor *= 0.9  # Slightly decrease each attempt
 
-            debug and print(f"[DEBUG] [{media_type.upper()}][{group_type.upper()}] Attempt {attempts}: "
-                            f"Fetched {len(fetched)}, Unique {len(unique)}, "
-                            f"New {len(new_items)}, Total Collected {len(collected)}")
+            debug and print(
+                f"[DEBUG] [{media_type.upper()}][{group_type.upper()}] Attempt {attempts}: "
+                f"Fetched {len(fetched)}, Unique {len(unique)}, "
+                f"New {len(new_items)}, Total Collected {len(collected)}"
+            )
 
             if len(new_items) == 0:
                 break  # No more new items likely available
 
         if len(collected) < per_group:
-            debug and print(f"[DEBUG] ⚠️ Only {len(collected)} {media_type}s available for group '{group_type}' (expected {per_group})")
+            debug and print(
+                f"[DEBUG] ⚠️ Only {len(collected)} {media_type}s available for group '{group_type}' (expected {per_group})"
+            )
 
         final_items_by_group[group_type] = collected[:per_group]
 
-        debug and print(f"[DEBUG] [{media_type.upper()}][{group_type.upper()}] Final count: {len(final_items_by_group[group_type])}")
+        debug and print(
+            f"[DEBUG] [{media_type.upper()}][{group_type.upper()}] Final count: {len(final_items_by_group[group_type])}"
+        )
         for item in final_items_by_group[group_type]:
             debug and print(f"  - {item.title} (ratingKey: {item.ratingKey})")
 
     # Combine all groups into one list with group_type info
     combined = []
-    for group_type in ['aired', 'added', 'random']:
+    for group_type in ["aired", "added", "random"]:
         combined.extend((item, group_type) for item in final_items_by_group[group_type])
 
     return combined
 
-def main_process(order_by, limit, download_movies, download_series,
-                 base_background, overlay, plex_logo):
+
+def main_process(
+    order_by,
+    limit,
+    download_movies,
+    download_series,
+    base_background,
+    overlay,
+    plex_logo,
+):
     """
     Main execution logic to select and process media items
     based on the 'order_by' parameter.
@@ -883,35 +990,39 @@ def main_process(order_by, limit, download_movies, download_series,
     # Ensure global plex_instance is initialized
     initialize_plex_connection()
 
-    if order_by == 'mix':
+    if order_by == "mix":
         # Mixed mode: fetch per-type to respect limit for each
         if download_movies:
             movie_seen = set()
-            movie_items = get_mixed_media(limit, download_movies=True, download_series=False, seen=movie_seen)
+            movie_items = get_mixed_media(
+                limit, download_movies=True, download_series=False, seen=movie_seen
+            )
             for item, group_type in movie_items:
                 generate_background_for_item(
                     item,
-                    media_type='movie',
+                    media_type="movie",
                     group_type=group_type,
                     base_background=None,
                     overlay=None,
                     plex_logo=plex_logo,
-                    target_folder=background_dir
+                    target_folder=background_dir,
                 )
                 time.sleep(plex_api_delay_seconds)
 
         if download_series:
             show_seen = set()
-            show_items = get_mixed_media(limit, download_movies=False, download_series=True, seen=show_seen)
+            show_items = get_mixed_media(
+                limit, download_movies=False, download_series=True, seen=show_seen
+            )
             for item, group_type in show_items:
                 generate_background_for_item(
                     item,
-                    media_type='tv',
+                    media_type="tv",
                     group_type=group_type,
                     base_background=None,
                     overlay=None,
                     plex_logo=plex_logo,
-                    target_folder=background_dir
+                    target_folder=background_dir,
                 )
                 time.sleep(plex_api_delay_seconds)
 
@@ -919,20 +1030,25 @@ def main_process(order_by, limit, download_movies, download_series,
         # Single mode: download movies and/or series based on order_by parameter
         if download_movies:
             download_latest_media(
-                order_by, limit, 'movie',
+                order_by,
+                limit,
+                "movie",
                 target_folder=background_dir,
                 base_background=None,
                 overlay=overlay,
-                plex_logo=plex_logo
+                plex_logo=plex_logo,
             )
         if download_series:
             download_latest_media(
-                order_by, limit, 'tv',
+                order_by,
+                limit,
+                "tv",
                 target_folder=background_dir,
                 base_background=None,
                 overlay=overlay,
-                plex_logo=plex_logo
+                plex_logo=plex_logo,
             )
+
 
 # === Main Execution Logic ===
 
@@ -958,7 +1074,9 @@ except (NameError, ValueError, TypeError):
     plex_logo_horizontal_offset = 0  # Default horizontal shift
 
 # Attempt to download the user-configured font
-debug and print(f"[DEBUG] Attempting to download user-configured font: {user_font_name}")
+debug and print(
+    f"[DEBUG] Attempting to download user-configured font: {user_font_name}"
+)
 font_downloaded = download_font(user_font_url, user_font_name)
 
 # If the user-configured font download succeeds, set truetype_path
@@ -979,11 +1097,13 @@ if not font_downloaded and not (
 # Step 3: If default font also fails, try additional fallback fonts
 if not font_downloaded:
     for fallback in additional_fallback_fonts:
-        print(f"[ERROR] Default font download failed. Trying additional fallback font: {fallback['path']}")
-        font_downloaded = download_font(fallback['url'], fallback['path'])
+        print(
+            f"[ERROR] Default font download failed. Trying additional fallback font: {fallback['path']}"
+        )
+        font_downloaded = download_font(fallback["url"], fallback["path"])
 
         if font_downloaded:
-            truetype_path = fallback['path']
+            truetype_path = fallback["path"]
             break
 
 # If no font is found, print an error and exit
@@ -995,7 +1115,7 @@ if __name__ == "__main__":
     # Load overlay resources once at module load
     BASE_PATH = os.path.dirname(__file__)
     try:
-        plex_logo = Image.open(os.path.join(BASE_PATH, plex_logo_file)).convert('RGBA')
+        plex_logo = Image.open(os.path.join(BASE_PATH, plex_logo_file)).convert("RGBA")
     except Exception as e:
         print(f"[ERROR] Failed to load overlay images: {e}")
         exit(1)
@@ -1008,5 +1128,5 @@ if __name__ == "__main__":
         download_series=download_series,
         base_background=None,
         overlay=None,
-        plex_logo=plex_logo
+        plex_logo=plex_logo,
     )
